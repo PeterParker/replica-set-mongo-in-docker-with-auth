@@ -1,0 +1,60 @@
+version: '3.4'
+services:
+
+  ######################################################################
+  # Test 1, WORKING - Replica Set without Auth
+  ######################################################################
+
+  database-no-auth:
+    image: mongo:4.2
+    hostname: database-no-auth
+    volumes:
+      - ./init-replica-set.sh:/docker-entrypoint-initdb.d/init-replica-set.sh
+    extra_hosts:
+      - "database-no-auth:127.0.0.1"
+    expose:
+      - "27017"
+    command: mongod --replSet set
+
+  test-no-auth:
+    build:
+      context: .
+    volumes:
+      - ./test-no-auth.py:/test-no-auth.py
+    links:
+      - database-no-auth
+    depends_on:
+      - database-no-auth
+    command: python /test-no-auth.py
+
+  ######################################################################
+  # Test 2, NOT WORKING - Replica Set with Auth
+  ######################################################################
+
+  database-auth:
+    image: mongo:4.2
+    hostname: database-auth
+    environment:
+      - MONGO_INITDB_DATABASE=admin
+      - MONGO_INITDB_ROOT_USERNAME_FILE=/etc/mongo_initdb_root_username
+      - MONGO_INITDB_ROOT_PASSWORD_FILE=/etc/mongo_initdb_root_password
+    volumes:
+      - ./init-replica-set.sh:/docker-entrypoint-initdb.d/init-replica-set.sh
+      - ./mongo_initdb_root_username:/etc/mongo_initdb_root_username:ro
+      - ./mongo_initdb_root_password:/etc/mongo_initdb_root_password:ro
+    extra_hosts:
+      - "database-auth:127.0.0.1"
+    expose:
+      - "27017"
+    command: mongod --auth --replSet set
+
+  test-auth:
+    build:
+      context: .
+    volumes:
+      - ./test-auth.py:/test-auth.py
+    links:
+      - database-auth
+    depends_on:
+      - database-auth
+    command: python /test-auth.py
