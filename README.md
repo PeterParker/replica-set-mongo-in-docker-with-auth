@@ -34,3 +34,22 @@ Traceback (most recent call last):
     self._error_message(selector))
 pymongo.errors.ServerSelectionTimeoutError: No replica set members match selector "Primary()"
 ```
+
+The docker logs for the database include the following
+
+```
+/usr/local/bin/docker-entrypoint.sh: running /docker-entrypoint-initdb.d/init-replica-set.sh
+MongoDB shell version v4.2.0
+connecting to: mongodb://127.0.0.1:27017/admin?compressors=disabled&gssapiServiceName=mongodb
+2019-09-09T20:27:45.203+0000 I  NETWORK  [listener] connection accepted from 127.0.0.1:38246 #3 (1 connection now open)
+2019-09-09T20:27:45.204+0000 I  NETWORK  [conn3] received client metadata from 127.0.0.1:38246 conn3: { application: { name: "MongoDB Shell" }, driver: { name: "MongoDB Internal Client", version: "4.2.0" }, os: { type: "Linux", name: "Ubuntu", architecture: "x86_64", version: "18.04" } }
+Implicit session: session { "id" : UUID("4a92dfec-6b15-4d6c-80c6-f12e8f272137") }
+MongoDB server version: 4.2.0
+{
+	"ok" : 0,
+	"errmsg" : "This node was not started with the replSet option",
+	"code" : 76,
+	"codeName" : "NoReplicationEnabled"
+}
+bye
+```
